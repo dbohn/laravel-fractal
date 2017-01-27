@@ -3,8 +3,10 @@
 namespace Spatie\Fractal;
 
 use Closure;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use League\Fractal\Manager;
 use Illuminate\Http\JsonResponse;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 use Spatie\Fractalistic\Fractal as Fractalistic;
 use League\Fractal\Serializer\SerializerAbstract;
 
@@ -42,6 +44,23 @@ class Fractal extends Fractalistic
         }
 
         return $fractal->serializeWith(new $serializer());
+    }
+
+    /**
+     * Set a paginator from a LengthAwarePaginator and get the underlying collection.
+     *
+     * @param LengthAwarePaginator $paginator
+     * @param \League\Fractal\TransformerAbstract|callable|null $transformer
+     * @param string|null $resourceName
+     *
+     * @return $this
+     */
+    public function paginate(LengthAwarePaginator $paginator, $transformer = null, $resourceName = null)
+    {
+        $collection = $paginator->getCollection();
+
+        return $this->collection($collection, $transformer, $resourceName)
+            ->paginateWith(new IlluminatePaginatorAdapter($paginator));
     }
 
     /**
